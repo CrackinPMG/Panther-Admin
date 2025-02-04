@@ -1,0 +1,322 @@
+repeat task.wait() until game:IsLoaded()
+
+local PantherAdmin_UI = Instance.new("ScreenGui")
+PantherAdmin_UI.Name = "PantherAdmin_UI"
+PantherAdmin_UI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local API = {}
+
+local MainFrame = Instance.new("ImageLabel")
+MainFrame.Image = "rbxassetid://18610728562"
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = PantherAdmin_UI
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Size = UDim2.new(0, 350, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local MainFrameCorner = Instance.new("UICorner")
+MainFrameCorner.CornerRadius = UDim.new(0, 12)
+MainFrameCorner.Parent = MainFrame
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Parent = MainFrame
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 12)
+TitleBarCorner.Parent = TitleBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleBar.BackgroundTransparency = 0.2
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = TitleBar
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+TitleLabel.Position = UDim2.new(0, 36, 0, 0)
+TitleLabel.Text = "Panther Admin"
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextScaled = false
+TitleLabel.TextSize = 14
+TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Parent = TitleBar
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Position = UDim2.new(1, -70, 0, 5)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MinimizeButton.Text = "–"
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.TextScaled = true
+MinimizeButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+local MinimizeButtonCorner = Instance.new("UICorner")
+MinimizeButtonCorner.CornerRadius = UDim.new(0, 6)
+MinimizeButtonCorner.Parent = MinimizeButton
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = TitleBar
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CloseButton.Text = "×"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextScaled = true
+CloseButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+local CloseButtonCorner = Instance.new("UICorner")
+CloseButtonCorner.CornerRadius = UDim.new(0, 6)
+CloseButtonCorner.Parent = CloseButton
+
+local SearchBar = Instance.new("TextBox")
+SearchBar.Name = "SearchBar"
+SearchBar.Parent = MainFrame
+SearchBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SearchBar.BackgroundTransparency = 1
+SearchBar.BorderSizePixel = 0
+SearchBar.Position = UDim2.new(0, 10, 0, 45)
+SearchBar.Size = UDim2.new(0, 330, 0, 25)
+SearchBar.Font = Enum.Font.SourceSans
+SearchBar.PlaceholderText = "Search commands..."
+SearchBar.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+SearchBar.Text = ""
+SearchBar.TextColor3 = Color3.fromRGB(240, 240, 240)
+SearchBar.TextSize = 14
+
+local CommandsList = Instance.new("ScrollingFrame")
+CommandsList.Name = "CommandsList"
+CommandsList.Parent = MainFrame
+CommandsList.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CommandsList.BackgroundTransparency = 1
+CommandsList.Position = UDim2.new(0, 10, 0, 80)
+CommandsList.Size = UDim2.new(1, -20, 0, 260)
+CommandsList.ScrollBarThickness = 6
+CommandsList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+local CommandsListCorner = Instance.new("UICorner")
+CommandsListCorner.CornerRadius = UDim.new(0, 8)
+CommandsListCorner.Parent = CommandsList
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = CommandsList
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+local CommandBar = Instance.new("TextBox")
+CommandBar.Name = "CommandBar"
+CommandBar.Parent = MainFrame
+CommandBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+CommandBar.Size = UDim2.new(1, -20, 0, 30)
+CommandBar.Position = UDim2.new(0, 10, 1, -40)
+CommandBar.Font = Enum.Font.SourceSans
+CommandBar.PlaceholderText = "Execute command..."
+CommandBar.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+CommandBar.Text = ""
+CommandBar.TextColor3 = Color3.fromRGB(240, 240, 240)
+CommandBar.TextSize = 16
+CommandBar.ClearTextOnFocus = false
+CommandBar.BackgroundTransparency = 0.6
+local CommandBarCorner = Instance.new("UICorner")
+CommandBarCorner.CornerRadius = UDim.new(0, 8)
+CommandBarCorner.Parent = CommandBar
+
+local DescriptionTextBox = Instance.new("TextLabel")
+DescriptionTextBox.Name = "DescriptionTextBox"
+DescriptionTextBox.Parent = MainFrame
+DescriptionTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+DescriptionTextBox.BackgroundTransparency = 1
+DescriptionTextBox.BorderSizePixel = 0
+DescriptionTextBox.Position = UDim2.new(0, 10, 0, 375)
+DescriptionTextBox.Size = UDim2.new(0, 330, 0, 27)
+DescriptionTextBox.Visible = false
+DescriptionTextBox.Font = Enum.Font.SourceSans
+DescriptionTextBox.Text = ""
+DescriptionTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+DescriptionTextBox.TextSize = 14
+DescriptionTextBox.TextStrokeTransparency = 0.65
+
+local Commands = {}
+
+
+function API:AddCommand(header, description, commandFunction, isHidden, extra, isPre, doNotLower, aliases, extraText)
+    local CommandLabel = Instance.new("TextButton")
+    CommandLabel.Name = header
+    CommandLabel.Parent = isHidden and nil or CommandsList
+    CommandLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    CommandLabel.Size = UDim2.new(1, 0, 0, 30)
+    CommandLabel.Font = Enum.Font.SourceSans
+    CommandLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+    CommandLabel.TextSize = 16
+    CommandLabel.BackgroundTransparency = 0.4
+
+    local CommandLabelCorner = Instance.new("UICorner")
+    CommandLabelCorner.CornerRadius = UDim.new(0, 8)
+    CommandLabelCorner.Parent = CommandLabel
+
+    if isPre then
+        CommandLabel.TextColor3 = Color3.new(1, 0.796, 0.066)
+    end
+
+    Commands[doNotLower and header or header:lower()] = commandFunction
+
+    -- Store aliases
+    if aliases then
+        for _, alias in pairs(aliases) do
+            Commands[doNotLower and alias or alias:lower()] = commandFunction
+        end
+    end
+
+    -- Format alias text using "/" instead of ","
+    local aliasText = aliases and (" / " .. table.concat(aliases, " / ")) or ""
+    CommandLabel.Text = header .. aliasText .. (extraText and (" " .. extraText) or "")
+
+    CommandLabel.MouseButton1Click:Connect(function()
+        CommandBar.Text = header
+        CommandBar:CaptureFocus()
+    end)
+
+    CommandLabel.MouseEnter:Connect(function()
+        CommandLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        DescriptionTextBox.Text = description
+        DescriptionTextBox.Visible = true
+    end)
+
+    CommandLabel.MouseLeave:Connect(function()
+        CommandLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        DescriptionTextBox.Visible = false
+    end)
+
+    local function ExecuteCommand(text)
+        local splitText = doNotLower and text:split(" ") or text:lower():split(" ")
+        local commandKey = splitText[1]:lower()
+        local args = {}
+        for i = 2, #splitText do
+            table.insert(args, splitText[i])
+        end
+        if Commands[commandKey] then
+            local success, errorMessage = pcall(function()
+                Commands[commandKey](args)
+            end)
+            if not success and errorMessage then
+                warn("ERROR: " .. tostring(errorMessage))
+            end
+        else
+            warn("Unknown command: " .. commandKey)
+        end
+    end
+
+    CommandBar.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            ExecuteCommand(CommandBar.Text)
+            task.wait(0.04)
+            CommandBar.Text = ""
+        end
+    end)
+end
+
+CommandBar.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local cmd = CommandBar.Text:lower()
+        if Commands[cmd] then
+            pcall(Commands[cmd], {})
+        end
+        CommandBar.Text = ""
+    end
+end)
+
+SearchBar.Changed:Connect(function(property)
+    if property:lower() == "text" then
+        CommandsList.CanvasPosition = Vector2.new(0, 0)
+        if #SearchBar.Text > 0 then
+            for _, v in pairs(CommandsList:GetChildren()) do
+                if v:IsA("TextButton") then
+                    v.Visible = string.find(string.lower(v.Text), string.lower(SearchBar.Text)) ~= nil
+                end
+            end
+        else
+            for _, v in pairs(CommandsList:GetChildren()) do
+                if v:IsA("TextButton") then
+                    v.Visible = true
+                end
+            end
+        end
+    end
+end)
+
+MinimizeButton.MouseButton1Click:Connect(function()
+    local isMinimized = MainFrame.Size.Y.Offset <= 40
+    MainFrame:TweenSize(UDim2.new(0, 350, 0, isMinimized and 450 or 40), "Out", "Quad", 0, true)
+    CommandBar.Visible = isMinimized
+    SearchBar.Visible = isMinimized
+    CommandsList.Visible = isMinimized
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    PantherAdmin_UI:Destroy()
+end)
+
+-- Criminal Base Teleport Command
+API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
+	local Player = game:GetService("Players").LocalPlayer.Character
+    local yardPosition = CFrame.new(-860.533, 94.476, 2099.548)
+	local currentPosition = Player.HumanoidRootPart.CFrame.Position
+    local currentRotation = Player.HumanoidRootPart.CFrame - Player.HumanoidRootPart.CFrame.Position
+    
+    -- Set the player's position to the criminal base without changing direction
+    Player:SetPrimaryPartCFrame(yardPosition * currentRotation)
+end, false, nil, nil, nil, {"base", "cb"})
+
+-- GoTo Command with Aliases and Random Player Teleport
+API:AddCommand("goto", "Teleports to a player", function(args)
+    if not args[1] then return end
+    local targetName = args[1]:lower()
+    local targetPlayer = nil
+
+	if targetName == "random" then
+    local players = game:GetService("Players"):GetPlayers()
+    targetPlayer = players[math.random(1, #players)]
+    
+    -- Ensure the random player is not the local player
+    while targetPlayer == game.Players.LocalPlayer do
+        targetPlayer = players[math.random(1, #players)]
+    end
+	else
+        -- Search for a player with a matching name
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if string.lower(player.Name):sub(1, #targetName) == targetName 
+            or string.lower(player.DisplayName):sub(1, #targetName) == targetName then
+                targetPlayer = player
+                break
+            end
+        end
+    end
+
+    -- Teleport if the player is found
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
+        local Player = game.Players.LocalPlayer
+        local Amount = 3
+
+        if Player.PlayerGui:FindFirstChild("Home") and 
+           Player.PlayerGui.Home:FindFirstChild("hud") and
+           Player.PlayerGui.Home.hud:FindFirstChild("Topbar") and
+           Player.PlayerGui.Home.hud.Topbar:FindFirstChild("titleBar") and
+           Player.PlayerGui.Home.hud.Topbar.titleBar:FindFirstChild("Title") then
+
+            local titleText = Player.PlayerGui.Home.hud.Topbar.titleBar.Title.Text:lower()
+            if titleText == "lights out" or titleText == "lightsout" then
+                Amount = 5
+            end
+        end
+
+        for i = 1, Amount do
+            Player.Character:WaitForChild("Humanoid").Sit = false
+            Player.Character:WaitForChild("HumanoidRootPart").CFrame = 
+                targetPlayer.Character:WaitForChild("HumanoidRootPart").CFrame * CFrame.new(0, 3, 2.5)
+            game:GetService("RunService").Stepped:Wait()
+        end
+    else
+        print("Error: Player not found or character invalid.")
+    end
+end, false, nil, nil, nil, {"to", "tp"}, "[player, random]")
