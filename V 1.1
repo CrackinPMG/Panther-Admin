@@ -257,10 +257,9 @@ CloseButton.MouseButton1Click:Connect(function()
     PantherAdmin_UI:Destroy()
 end)
 
--- Criminal Base Teleport Command
-API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
+function API:MoveTo(CFrame)
 	local Player = game:GetService("Players").LocalPlayer.Character
-    local yardPosition = CFrame.new(-860.533, 94.476, 2099.548)
+    local yardPosition = CFrame.new(CFrame)
 	local currentPosition = Player.HumanoidRootPart.CFrame.Position
     local currentRotation = Player.HumanoidRootPart.CFrame - Player.HumanoidRootPart.CFrame.Position
 	for i = 1, 3 do
@@ -268,6 +267,11 @@ API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
             Player:SetPrimaryPartCFrame(yardPosition * currentRotation)  
             game:GetService("RunService").Stepped:Wait()
         end
+end
+
+-- Criminal Base Teleport Command
+API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
+	API:MoveTo(-860.533, 94.476, 2099.548)
 end, false, nil, nil, nil, {"base", "cb"})
 
 -- GoTo Command with Aliases and Random Player Teleport
