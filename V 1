@@ -263,7 +263,7 @@ API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
     local yardPosition = CFrame.new(-860.533, 94.476, 2099.548)
 	local currentPosition = Player.HumanoidRootPart.CFrame.Position
     local currentRotation = Player.HumanoidRootPart.CFrame - Player.HumanoidRootPart.CFrame.Position
-Player.Character:WaitForChild("Humanoid").Sit = false
+Player:WaitForChild("Humanoid").Sit = false
     Player:SetPrimaryPartCFrame(yardPosition * currentRotation)
 end, false, nil, nil, nil, {"base", "cb"})
 
