@@ -420,9 +420,7 @@ if targetName == "random" then
     local players = game:GetService("Players"):GetPlayers()
     
     if #players > 1 then -- Ensure there are enough players
-        repeat
             targetPlayer = players[math.random(1, #players)]
-        until targetPlayer ~= game.Players.LocalPlayer and targetPlayer.Team ~= game.Teams.Criminals
     end
 else
     for _, player in pairs(game.Players:GetPlayers()) do
