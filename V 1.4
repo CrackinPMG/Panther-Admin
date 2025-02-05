@@ -401,7 +401,7 @@ function API:Bring(Target, TeleportTo)
             if not Target.Character or Target.Character:FindFirstChildOfClass("Humanoid").Health < 1 then
                 break
             end
-            CarSelected:SetPrimaryPartCFrame(Target.Character:GetPrimaryPartCFrame() * CFrame.new(0, -0.2, -5))
+            CarSelected:SetPrimaryPartCFrame(Target.Character:GetPrimaryPartCFrame() * CFrame.new(0, -4, -5))
         until Target.Character:FindFirstChildOfClass("Humanoid").Sit == true or Attempts > 500
 
         for i = 1, 5 do
