@@ -401,42 +401,43 @@ function API:Bring(Target, TeleportTo)
             if not Target.Character or Target.Character:FindFirstChildOfClass("Humanoid").Health < 1 then
                 break
             end
-            CarSelected:SetPrimaryPartCFrame(Target.Character:GetPrimaryPartCFrame() * CFrame.new(0, -4, -5))
+            CarSelected:SetPrimaryPartCFrame(Target.Character:GetPrimaryPartCFrame() * CFrame.new(0, -2, -5))
         until Target.Character:FindFirstChildOfClass("Humanoid").Sit == true or Attempts > 500
 
-        for i = 1, 5 do
-            task.wait()
+        for i = 1, 10 do
             CarSelected:SetPrimaryPartCFrame(TeleportTo)
+	    game:GetService("RunService").Stepped:Wait()
         end
     end
 end
 
 API:AddCommand("bring", "Brings a player to you", function(args)
     if not args[1] then return end
-    local targetName = args[1]:lower()
-    local targetPlayer = nil
+local targetName = args[1]:lower()
+local targetPlayer = nil
 
-    if targetName == "random" then
-        local players = game:GetService("Players"):GetPlayers()
-        targetPlayer = players[math.random(1, #players)]
-        
-        while targetPlayer == game.Players.LocalPlayer do
+if targetName == "random" then
+    local players = game:GetService("Players"):GetPlayers()
+    
+    if #players > 1 then -- Ensure there are enough players
+        repeat
             targetPlayer = players[math.random(1, #players)]
-        end
-    else
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if string.lower(player.Name):sub(1, #targetName) == targetName 
-            or string.lower(player.DisplayName):sub(1, #targetName) == targetName then
-                targetPlayer = player
-                break
-            end
+        until targetPlayer ~= game.Players.LocalPlayer and targetPlayer.Team ~= game.Teams.Criminals
+    end
+else
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if string.lower(player.Name):sub(1, #targetName) == targetName 
+        or string.lower(player.DisplayName):sub(1, #targetName) == targetName then
+            targetPlayer = player
+            break
         end
     end
+end
 
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
-        local TeleportTo = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
-        API:Bring(targetPlayer, TeleportTo)
-    else
-        print("Error: Player not found or character invalid.")
-    end
+if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
+    local TeleportTo = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
+    API:Bring(targetPlayer, TeleportTo)
+else
+    print("Error: Player not found or character invalid.")
+end
 end, false, nil, nil, nil, {"tp"}, "[player, random]")
