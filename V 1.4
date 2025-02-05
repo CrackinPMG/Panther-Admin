@@ -273,7 +273,6 @@ end
 -- Criminal Base Teleport Command
 API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
 	API:MoveTo(CFrame.new(-860.533, 95.476, 2099.548))
-	API:MoveTo(CFrame.new(-860.533, 94.476, 2099.548))
 end, false, nil, nil, nil, {"base", "cb"})
 
 API:AddCommand("nspawn", "Teleports you to the neutral spawn", function(args)
@@ -291,6 +290,7 @@ end, false, nil, nil, nil, {"tunl", "tnl"})
 API:AddCommand("fridge", "Teleports you to the refrigerator", function(args)
 	local Player = game:GetService("Players").LocalPlayer.Character
     if not Player or not Player:FindFirstChild("HumanoidRootPart") then return end
+
     for i = 1, 3 do
         Player:WaitForChild("Humanoid").Sit = false
         Player:SetPrimaryPartCFrame(CFrame.new(787, 102, 2250.5))
@@ -349,4 +349,94 @@ API:AddCommand("goto", "Teleports to a player", function(args)
     else
         print("Error: Player not found or character invalid.")
     end
-end, false, nil, nil, nil, {"to", "tp"}, "[player, random]")
+end, false, nil, nil, nil, {"to"}, "[player, random]")
+
+function API:Bring(Target, TeleportTo)
+    if not TeleportTo then
+        TeleportTo = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
+    end
+    local CarSelected = nil
+    local Seat = nil
+    local Attempts = 0
+    
+    for i, v in pairs(game:GetService("Workspace").CarContainer:GetChildren()) do
+        if v then
+            if v:WaitForChild("Body"):WaitForChild("VehicleSeat").Occupant == nil then
+                CarSelected = v
+            end
+        end
+    end
+
+    if not CarSelected then
+        coroutine.wrap(function()
+            if not CarSelected then
+                CarSelected = game:GetService("Workspace").CarContainer.ChildAdded:Wait()
+            end
+        end)()
+
+        game:GetService("Players").LocalPlayer.Character:SetPrimaryPartCFrame(game:GetService("Workspace").Prison_ITEMS.buttons:GetChildren()[7]["Car Spawner"].CFrame * CFrame.new(0, 0.5, 0))
+        wait(0.23)
+
+        repeat task.wait()
+            task.spawn(function()
+                workspace.Remote.ItemHandler:InvokeServer(game:GetService("Workspace").Prison_ITEMS.buttons:GetChildren()[7]["Car Spawner"])
+            end)
+        until CarSelected
+    end
+
+    repeat game:GetService("RunService").RenderStepped:Wait() until CarSelected ~= nil
+
+    if CarSelected then
+        CarSelected:WaitForChild("Body"):WaitForChild("VehicleSeat")
+        CarSelected.PrimaryPart = CarSelected.Body.VehicleSeat
+        Seat = CarSelected.Body.VehicleSeat
+        CarSelected:SetPrimaryPartCFrame(game:GetService("Players").LocalPlayer.Character:GetPrimaryPartCFrame())
+        
+        repeat task.wait()
+            Seat:Sit(game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"))
+        until game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Sit == true
+
+        repeat game:GetService("RunService").RenderStepped:Wait()
+            Attempts = Attempts + 1
+            if not Target.Character or Target.Character:FindFirstChildOfClass("Humanoid").Health < 1 then
+                break
+            end
+            CarSelected:SetPrimaryPartCFrame(Target.Character:GetPrimaryPartCFrame() * CFrame.new(0, -0.2, -5))
+        until Target.Character:FindFirstChildOfClass("Humanoid").Sit == true or Attempts > 500
+
+        for i = 1, 5 do
+            task.wait()
+            CarSelected:SetPrimaryPartCFrame(TeleportTo)
+        end
+    end
+end
+
+API:AddCommand("bring", "Brings a player to you", function(args)
+    if not args[1] then return end
+    local targetName = args[1]:lower()
+    local targetPlayer = nil
+
+    if targetName == "random" then
+        local players = game:GetService("Players"):GetPlayers()
+        targetPlayer = players[math.random(1, #players)]
+        
+        while targetPlayer == game.Players.LocalPlayer do
+            targetPlayer = players[math.random(1, #players)]
+        end
+    else
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if string.lower(player.Name):sub(1, #targetName) == targetName 
+            or string.lower(player.DisplayName):sub(1, #targetName) == targetName then
+                targetPlayer = player
+                break
+            end
+        end
+    end
+
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
+        local TeleportTo = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
+        API:Bring(targetPlayer, TeleportTo)
+    else
+        print("Error: Player not found or character invalid.")
+    end
+end, false, nil, nil, nil, {"tp"}, "[player, random]")
