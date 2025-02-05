@@ -272,8 +272,31 @@ end
 
 -- Criminal Base Teleport Command
 API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
+	API:MoveTo(CFrame.new(-860.533, 95.476, 2099.548))
 	API:MoveTo(CFrame.new(-860.533, 94.476, 2099.548))
 end, false, nil, nil, nil, {"base", "cb"})
+
+API:AddCommand("nspawn", "Teleports you to the neutral spawn", function(args)
+	API:MoveTo(CFrame.new(879, 29, 2349))
+end, false, nil, nil, nil, nil)
+
+API:AddCommand("office", "Teleports you to the secret office", function(args)
+	API:MoveTo(CFrame.new(700, 101, 2357))
+end, false, nil, nil, nil, nil)
+
+API:AddCommand("tunnel", "Teleports you to the tunnel", function(args)
+	API:MoveTo(CFrame.new(527, 90, 2575))
+end, false, nil, nil, nil, {"tunl", "tnl"})
+
+API:AddCommand("fridge", "Teleports you to the refrigerator", function(args)
+	local Player = game:GetService("Players").LocalPlayer.Character
+    if not Player or not Player:FindFirstChild("HumanoidRootPart") then return end
+    for i = 1, 3 do
+        Player:WaitForChild("Humanoid").Sit = false
+        Player:SetPrimaryPartCFrame(CFrame.new(787, 102, 2250.5))
+        game:GetService("RunService").Stepped:Wait()
+    end
+end, false, nil, nil, nil, {"freezer"})
 
 -- GoTo Command with Aliases and Random Player Teleport
 API:AddCommand("goto", "Teleports to a player", function(args)
