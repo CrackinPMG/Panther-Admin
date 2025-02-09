@@ -304,15 +304,6 @@ API:AddCommand("goto", "Teleports to a player", function(args)
     local targetName = args[1]:lower()
     local targetPlayer = nil
 
-	if targetName == "random" then
-    local players = game:GetService("Players"):GetPlayers()
-    targetPlayer = players[math.random(1, #players)]
-    
-    -- Ensure the random player is not the local player
-    while targetPlayer == game.Players.LocalPlayer do
-        targetPlayer = players[math.random(1, #players)]
-    end
-	else
         -- Search for a player with a matching name
         for _, player in pairs(game.Players:GetPlayers()) do
             if string.lower(player.Name):sub(1, #targetName) == targetName 
@@ -321,7 +312,6 @@ API:AddCommand("goto", "Teleports to a player", function(args)
                 break
             end
         end
-    end
 
     -- Teleport if the player is found
     if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
@@ -349,7 +339,7 @@ API:AddCommand("goto", "Teleports to a player", function(args)
     else
         print("Error: Player not found or character invalid.")
     end
-end, false, nil, nil, nil, {"to"}, "[player, random]")
+end, false, nil, nil, nil, {"to"}, "[player]")
 
 function API:Bring(Target, TeleportTo)
     if not TeleportTo then
@@ -416,13 +406,6 @@ API:AddCommand("bring", "Brings a player to you", function(args)
 local targetName = args[1]:lower()
 local targetPlayer = nil
 
-if targetName == "random" then
-    local players = game:GetService("Players"):GetPlayers()
-    
-    if #players > 1 then -- Ensure there are enough players
-            targetPlayer = players[math.random(1, #players)]
-    end
-else
     for _, player in pairs(game.Players:GetPlayers()) do
         if string.lower(player.Name):sub(1, #targetName) == targetName 
         or string.lower(player.DisplayName):sub(1, #targetName) == targetName then
@@ -430,7 +413,6 @@ else
             break
         end
     end
-end
 
 if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
     local TeleportTo = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
@@ -438,4 +420,134 @@ if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPar
 else
     print("Error: Player not found or character invalid.")
 end
-end, false, nil, nil, nil, {"tp"}, "[player, random]")
+end, false, nil, nil, nil, {"tp"}, "[player]")
+
+API:AddCommand("spampunch", "You can spam the punch button", function(args)
+	local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local animationToggle = false
+local holdingF = false
+
+local function doPunch(speed)
+	local character = LocalPlayer.Character
+	if character and character:FindFirstChild("Humanoid") then
+		local fightLeftAnimation = character.ClientInputHandler.fight_left
+		local fightRightAnimation = character.ClientInputHandler.fight_right
+		local punchSound = character.Head.punchSound
+		local humanoid = character:FindFirstChild("Humanoid")
+		local animator = humanoid:FindFirstChild("Animator")
+		if animator then
+			local animation = animationToggle and fightRightAnimation or fightLeftAnimation
+			local track = animator:LoadAnimation(animation)
+			track:Play()
+			track:AdjustSpeed(speed)
+			animationToggle = not animationToggle
+		end
+		local hit = false
+		local primaryPart = character.PrimaryPart
+		if primaryPart then
+			local connection = primaryPart.Touched:Connect(function(otherPart)
+				local otherCharacter = otherPart.Parent
+				if otherCharacter and otherCharacter ~= character and otherCharacter:FindFirstChildOfClass("Humanoid") and not hit then
+					local targetPlayer = Players:GetPlayerFromCharacter(otherCharacter)
+					if targetPlayer then
+						hit = true
+						ReplicatedStorage.meleeEvent:FireServer(targetPlayer)
+						ReplicatedStorage.SoundEvent:FireServer(punchSound, character.Head)
+						punchSound:Play()
+						connection:Disconnect()
+					end
+				end
+			end)
+			delay(0.03, function()
+				if connection and connection.Connected then
+					connection:Disconnect()
+				end
+			end)
+			if not hit then
+				for _, player in pairs(Players:GetPlayers()) do
+					if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
+						local targetPrimary = player.Character.PrimaryPart
+						if targetPrimary and (targetPrimary.Position - primaryPart.Position).Magnitude <= 4 then
+							hit = true
+							ReplicatedStorage.meleeEvent:FireServer(player)
+							ReplicatedStorage.SoundEvent:FireServer(punchSound, character.Head)
+							punchSound:Play()
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then return end
+	if input.KeyCode == Enum.KeyCode.F and not holdingF then
+		holdingF = true
+		doPunch(1.1)
+		task.wait(0.1)
+		if holdingF then
+			while holdingF do
+				doPunch(5)
+				task.wait(0.03)
+			end
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.F then
+		holdingF = false
+	end
+end)
+
+end, false, nil, nil, nil, {"spunch", "fastpunch"})
+
+API:AddCommand("jerk", "Start fucking yourself", function(args)
+	workspace.Remote.ItemHandler:InvokeServer({Position=game:GetService("Players").LocalPlayer.Character.Head.Position,Parent=workspace.Prison_ITEMS.giver["AK-47"]})
+	workspace.Remote.ItemHandler:InvokeServer({Position=game:GetService("Players").LocalPlayer.Character.Head.Position,Parent=workspace.Prison_ITEMS.giver["M9"]})
+	workspace.Remote.ItemHandler:InvokeServer({Position=game:GetService("Players").LocalPlayer.Character.Head.Position,Parent=workspace.Prison_ITEMS.giver["Remington 870"]})
+	wait(1)
+	local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local character = Player.Character
+local humanoid = character and character:FindFirstChild("Humanoid")
+local animator = humanoid and humanoid:FindFirstChild("Animator")
+
+for i,v in pairs(Player.Character:GetChildren()) do
+				if v:IsA("Tool") then
+					v.Parent = Player.Backpack
+				end
+			end
+			Player.Backpack.M9.Parent = Player.Character
+			Player.Backpack["AK-47"].Parent = Player.Character
+			Player.Backpack["Remington 870"].Parent = Player.Character
+			wait()
+			Player.Character.M9.GripPos = Vector3.new(0.9, 2, 0)
+			Player.Character["Remington 870"].GripPos = Vector3.new(0.9, 2, 2.1)
+			Player.Character["AK-47"].GripPos = Vector3.new(0.9, 2, 6.4)
+			wait()
+			for i,v in pairs(Player.Character:GetChildren()) do
+				if v:IsA("Tool") then
+					v.Parent = Player.Backpack
+				end
+			end
+			wait()
+			Player.Backpack.M9.Parent = Player.Character
+			Player.Backpack["AK-47"].Parent = Player.Character
+			Player.Backpack["Remington 870"].Parent = Player.Character
+
+if animator then
+	while wait(0.1) do
+    local jerkOff = game:GetService("ReplicatedStorage").Tools["Crude Knife"].Handle.Animation
+    local track = animator:LoadAnimation(jerkOff)
+    track:Play()
+    track:AdjustSpeed(3)
+	end
+end
+end, false, nil, nil, nil, {"masturbate"})
