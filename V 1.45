@@ -551,3 +551,35 @@ if animator then
 	end
 end
 end, false, nil, nil, nil, {"masturbate"})
+
+API:AddCommand("shield", "Give player someone's riot shield", function(args)
+	for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+    local path = player.Backpack:FindFirstChild("Riot Shield")
+    
+    if path then
+        for i = 1, 4 do
+            Workspace.Remote.equipShield:FireServer(path)
+        end
+        path.Parent = game:GetService("Players").LocalPlayer.Backpack
+    else
+        print(player.Name .. " does not have a Riot Shield")
+    end
+end
+end, false, nil, nil, nil, {"rshield"})
+
+API:AddCommand("cuffs", "Gives player handcuffs", function(args)
+	local player = game:GetService("Players").LocalPlayer
+local backpack = player.Backpack
+
+if not backpack:FindFirstChild("Handcuffs") then
+    for _, targetPlayer in pairs(game:GetService("Players"):GetPlayers()) do
+        if targetPlayer ~= player then
+            local taser = targetPlayer.Backpack:FindFirstChild("Handcuffs")
+            if taser then
+                taser:Clone().Parent = backpack
+                break
+            end
+        end
+    end
+end
+end, false, nil, nil, nil, {"handcuffs"})
