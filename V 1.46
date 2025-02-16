@@ -139,6 +139,63 @@ DescriptionTextBox.TextStrokeTransparency = 0.65
 
 local Commands = {}
 
+function API:Tween(Obj, Prop, New, Time)
+	if not Time then
+		Time = .5
+	end
+	local TweenService = game:GetService("TweenService")
+	local info = TweenInfo.new(
+		Time, 
+		Enum.EasingStyle.Quart, 
+		Enum.EasingDirection.Out, 
+		0, 
+		false,
+		0
+	)
+	local propertyTable = {
+		[Prop] = New,
+	}
+
+	TweenService:Create(Obj, info, propertyTable):Play()
+end
+
+function API:Notify(Text,Dur)
+	task.spawn(function()
+		if not Dur then
+			Dur = 1.5
+		end
+		local Notify = Instance.new("ScreenGui")
+		local Frame_1 = Instance.new("Frame")
+		local TextLabel = Instance.new("TextLabel")
+		Notify.Parent = (game:GetService("CoreGui") or gethui())
+		Notify.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		Frame_1.Parent = Notify
+		Frame_1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		Frame_1.BackgroundTransparency=1
+		Frame_1.BorderSizePixel = 0
+		Frame_1.Position = UDim2.new(0, 0, 0.0500000007, 0)
+		Frame_1.Size = UDim2.new(1, 0, 0.100000001, 0)
+		TextLabel.Parent = Frame_1
+		TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel.BackgroundTransparency = 1.000
+		TextLabel.TextTransparency =1
+		TextLabel.Size = UDim2.new(1, 0, 1, 0)
+		TextLabel.Font = Enum.Font.Highway
+		TextLabel.Text = Text or "Text not found"
+		TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel.TextSize = 21.000
+		API:Tween(Frame_1,"BackgroundTransparency",0.350,.5)
+		API:Tween(TextLabel,"TextTransparency",0,.5)
+		wait(Dur+.7)
+		API:Tween(Frame_1,"BackgroundTransparency",1,.5)
+		API:Tween(TextLabel,"TextTransparency",1,.5)
+		wait(.7)
+		Notify:Destroy()
+	end)
+	return
+end
+
+API:Notify("Panther Admin successfully loaded", 2)
 
 function API:AddCommand(header, description, commandFunction, isHidden, extra, isPre, doNotLower, aliases, extraText)
     local CommandLabel = Instance.new("TextButton")
@@ -273,6 +330,7 @@ end
 -- Criminal Base Teleport Command
 API:AddCommand("crimbase", "Teleports you to the criminal base", function(args)
 	API:MoveTo(CFrame.new(-860.533, 95.476, 2099.548))
+API:Notify("Succesfully teleported to the criminal base")
 end, false, nil, nil, nil, {"base", "cb"})
 
 API:AddCommand("nspawn", "Teleports you to the neutral spawn", function(args)
@@ -423,89 +481,94 @@ end
 end, false, nil, nil, nil, {"tp"}, "[player]")
 
 API:AddCommand("spampunch", "You can spam the punch button", function(args)
-	local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+local Player = game:GetService("Players").LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local script = Character:WaitForChild("ClientInputHandler")
+local cs = {
+    isFighting = false;
+}
 
-local animationToggle = false
-local holdingF = false
-
-local function doPunch(speed)
-	local character = LocalPlayer.Character
-	if character and character:FindFirstChild("Humanoid") then
-		local fightLeftAnimation = character.ClientInputHandler.fight_left
-		local fightRightAnimation = character.ClientInputHandler.fight_right
-		local punchSound = character.Head.punchSound
-		local humanoid = character:FindFirstChild("Humanoid")
-		local animator = humanoid:FindFirstChild("Animator")
-		if animator then
-			local animation = animationToggle and fightRightAnimation or fightLeftAnimation
-			local track = animator:LoadAnimation(animation)
-			track:Play()
-			track:AdjustSpeed(speed)
-			animationToggle = not animationToggle
-		end
-		local hit = false
-		local primaryPart = character.PrimaryPart
-		if primaryPart then
-			local connection = primaryPart.Touched:Connect(function(otherPart)
-				local otherCharacter = otherPart.Parent
-				if otherCharacter and otherCharacter ~= character and otherCharacter:FindFirstChildOfClass("Humanoid") and not hit then
-					local targetPlayer = Players:GetPlayerFromCharacter(otherCharacter)
-					if targetPlayer then
-						hit = true
-						ReplicatedStorage.meleeEvent:FireServer(targetPlayer)
-						ReplicatedStorage.SoundEvent:FireServer(punchSound, character.Head)
-						punchSound:Play()
-						connection:Disconnect()
-					end
-				end
-			end)
-			delay(0.03, function()
-				if connection and connection.Connected then
-					connection:Disconnect()
-				end
-			end)
-			if not hit then
-				for _, player in pairs(Players:GetPlayers()) do
-					if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-						local targetPrimary = player.Character.PrimaryPart
-						if targetPrimary and (targetPrimary.Position - primaryPart.Position).Magnitude <= 4 then
-							hit = true
-							ReplicatedStorage.meleeEvent:FireServer(player)
-							ReplicatedStorage.SoundEvent:FireServer(punchSound, character.Head)
-							punchSound:Play()
-							break
-						end
-					end
-				end
-			end
-		end
-	end
+-- Function to simulate punching
+local function throwPunch_upvr(arg1, arg2)
+    local Position = Character.HumanoidRootPart.CFrame  -- Use HumanoidRootPart for accurate positioning
+    local a = Position * CFrame.new(0, 0, -1)  -- Adjust punch direction (forward)
+    
+    local punchSound = Character.Head:FindFirstChild("punchSound") -- Find punch sound under Head
+    if not punchSound then return end  -- Ensure sound exists
+    
+    local Part = Instance.new("Part", workspace)
+    Part.Transparency = 1
+    Part.CanCollide = false
+    Part.CFrame = a
+    
+    -- Detects collision and triggers the punch event
+    local p
+    p = Part.Touched:Connect(function(h)
+        if h and h.Parent and h.Parent:FindFirstChildOfClass("Humanoid") then
+            local Target = game:GetService("Players"):FindFirstChild(h.Parent.Name)
+            if Target and Target ~= Player then
+                -- Trigger melee event and play punch sound
+                task.spawn(function()
+                    game.ReplicatedStorage["meleeEvent"]:FireServer(Target)
+                    ReplicatedStorage.SoundEvent:FireServer(punchSound, Character.Head)
+                    punchSound:Play()
+                end)
+                
+                -- Disconnect and clean up
+                if p then
+                    p:Disconnect()
+                end
+                Part:Destroy()
+            end
+        end
+    end)
+    
+    -- Cleanup part after a delay
+    task.spawn(function()
+        wait(1)
+        if Part then
+            Part:Destroy()
+            if p then
+                p:Disconnect()
+            end
+        end
+    end)
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if gameProcessedEvent then return end
-	if input.KeyCode == Enum.KeyCode.F and not holdingF then
-		holdingF = true
-		doPunch(1.1)
-		task.wait(0.1)
-		if holdingF then
-			while holdingF do
-				doPunch(5)
-				task.wait(0.03)
-			end
-		end
-	end
-end)
+-- Load animations for left and right punches
+local any_LoadAnimation_result1_upvr_3 = Humanoid:LoadAnimation(script.fight_left)
+local any_LoadAnimation_result1_upvr_7 = Humanoid:LoadAnimation(script.fight_right)
+local var40_upvw = false
 
-UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.F then
-		holdingF = false
-	end
-end)
+-- Fight function to trigger punching
+local function fight_upvr()
+    cs.isFighting = true
+    any_LoadAnimation_result1_upvr_3:Stop()
+    any_LoadAnimation_result1_upvr_7:Stop()
 
+    if var40_upvw then
+        any_LoadAnimation_result1_upvr_3:Play()
+    else
+        any_LoadAnimation_result1_upvr_7:Play()
+    end
+    
+    var40_upvw = not var40_upvw
+    Humanoid.JumpPower = 0
+    delay(0.2, throwPunch_upvr)  -- Simulate punch after slight delay
+    wait(0.6)  -- Wait for animation cooldown
+    Humanoid.JumpPower = 50
+    cs.isFighting = false
+end
+
+-- Trigger fight on mouse click
+local UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then
+        fight_upvr()  -- Trigger fight when left mouse button is pressed
+    end
+end)
 end, false, nil, nil, nil, {"spunch", "fastpunch"})
 
 API:AddCommand("jerk", "Start fucking yourself", function(args)
